@@ -12,10 +12,19 @@
 
 int len;
 char str [50];
-int *mem_sel;   // memoizacao do melhor corte possivel apartir dessa letra
-char *mem_palindrome;
+int *mem_sel;   // memoizacao do melhor corte possivel a partir de tal posicao da string
+char *mem_palindrome; // memoizacao da qualidade de palindromo entre as substring e acessado como matriz (coluna + largura*linha)
+// mem_palindrome:	  A R A R A	onde x = -1; a matriz pode nao estar completa em tempo de execucao
+//			A 1 0 1 0 1     	      os valores sao calculados conforme a necessidade
+//			R x 1 0 1 0 
+// 			A x x 1 0 1
+// 			R x x x 1 0
+// 			A x x x x 1
 
+// retorna se uma substring de str (global) eh palindroma
 char isPalyndrome (int a, int b);
+// retorna o minimo de cortes possiveis para a string (local)
+// eh chamada recursivamente para (str+1), ou seja a substring a partir da proxima letra
 unsigned int min_cuts (char *str, int i);
 
 int main () {
@@ -54,6 +63,7 @@ char isPalyndrome (int a, int b) {
 	if (mem_palindrome[a + len*b] != (char) -1) // verifico se ja calcule a qualidade de palindromo para essa substring
 		return mem_palindrome[a + len*b];
 
+	// se a e b sao o mesmo caractere e a substring entre eles eh palindroma, essa substring tambem eh
 	return mem_palindrome[a + len*b] = (str[a] == str[b]) && isPalyndrome (a+1, b-1);
 }
 
@@ -67,20 +77,20 @@ unsigned int min_cuts (char *str, int i) {
 	int ret;
 	char *aux;
 
-	aux = str + i;
-	int j = i;
+	aux = str + i; // substring comecando na proxima letra igual aa primeira (onde pode haver uma palindroma)
+	int j = i; // indice dessa proxima letra
 
 	unsigned int min = -1; // unsigned -1 = maior valor possivel
 
-	while ( aux != NULL && min > 0 )
-	{
+	while ( aux != NULL && min > 0 ) // enquanto nao houver um corte imbativel (= 0), e nao acabaram as possiveis palindromas
+	{				 // continue verificando
 		if (isPalyndrome (i, j))
 		{
-			if (j == len - 1)
-				min = 0; // se vai ate o final da palavra nao ha cortes
+			if (j == len - 1) // se ja chegou no fim da palavra, nao precisou cortar nada
+				min = 0;
 			else
 				if ((ret = min_cuts(str, j+1)) + 1 < min)	// se retornou um valor inferior ao maximo
-					min = ret + 1;									// mesmo com o corte extra
+					min = ret + 1;				// mesmo com o corte extra, achou um corte melhor
 		}
 
 		aux = strchr (aux+1, *aux); // pega a proxima aparicao da letra => possivel palindromo
